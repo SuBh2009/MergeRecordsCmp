@@ -1,0 +1,113 @@
+<template>
+    <template if:true={isLoaded}>
+        <div class="slds-spinner_container ">
+            <div role="status" class="slds-spinner slds-spinner_medium slds-spinner_brand">
+                <span class="slds-assistive-text">Loading</span>
+                <div class="slds-spinner__dot-a"></div>
+                <div class="slds-spinner__dot-b"></div>
+                <div class="custom-loading-text">
+                  {loadingMessage}
+                </div>
+            </div>
+        </div>
+    </template>
+    <div class="container">
+        <div class="slds-scope">
+            <lightning-card variant="Narrow" icon-name="standard:file" title="File Upload">
+                <div class="slds-var-p-horizontal_small">
+                    <div class="slds-m-around_medium">
+                        <lightning-layout >
+                            <lightning-layout-item size="4">
+                                <template if:true={objectPicklist.data}>
+                                    <lightning-combobox name="objectName" label="Object:" value={sObjectName}
+                                    options={objectPicklist.data.values} onchange={displayFileUploadSec}>
+                                </lightning-combobox>
+                            </template>   
+                            </lightning-layout-item>
+                            <lightning-layout-item size="5" > </lightning-layout-item>
+                            <lightning-layout-item size="3" >  
+                                <c-merge-Concern-Component></c-merge-Concern-Component> 
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div>
+                    <div if:true={displayFileUpload}>
+                        <lightning-layout >
+                            <lightning-layout-item size="4" class="">
+                                <lightning-file-upload accept={acceptedFormats} 
+                                                        label="Attach CSV" 
+                                                        multiple="multiple" 
+                                                        onuploadfinished={handleUploadFinished} 
+                                                        record-id={recordId}></lightning-file-upload>
+                            </lightning-layout-item>
+                            <lightning-layout-item size="5" > </lightning-layout-item>
+                            <lightning-layout-item size="3" > 
+                            
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    
+                        <div if:true={error}>
+                            {error}
+                        </div><br/>
+
+                
+                        <div if:true={masterData} style="height: 300px;">
+                            <lightning-datatable class="datatable-full-size"
+                                                columns={columns} 
+                                                data={masterData} 
+                                                hide-checkbox-column="true" 
+                                                key-field="id"
+                                                onrowaction={handleRowAction}></lightning-datatable>
+                                           
+                        </div>
+                        <lightning-layout >
+                            <lightning-layout-item size="12" class="">
+                                <footer class="slds-modal__footer">
+                                    <lightning-button label="Merge" 
+                                    size="small" 
+                                    variant="brand" 
+                                    onclick={handleMergeRecord}
+                                    disabled={disableMergeButton}></lightning-button>
+                                </footer>
+                            </lightning-layout-item>
+                        </lightning-layout>
+                    </div>
+                </div>
+                <template if:true={modalContainer}>
+                    <section  class="slds-modal slds-fade-in-open">
+                        <div class="slds-modal__container">
+                            <header class="slds-modal__header">
+                                <button class="slds-button slds-button_icon slds-modal__close slds-button_icon-inverse" title="Close" onclick={closeModalAction}>
+                                <lightning-icon icon-name="utility:close" alternative-text="close" variant="inverse" size="small" ></lightning-icon>
+                                </button>
+                                <h2 class="slds-text-heading_medium slds-hyphenate">Victim Record Detail</h2>
+                            </header>
+        
+                            <div class="slds-modal__content slds-p-around_medium">
+                                <template if:false={hasVictimData}>
+                                    <div class="slds-m-vertical_medium">
+                                        No Victim Records available in Account!
+                                    </div>
+                                </template>
+                                <template if:true={hasVictimData}>
+                                    <div style="height: 300px;">
+                                        <lightning-datatable class="wrapped-header-datatable"
+                                                                columns={lstDataTableColumns} 
+                                                                data={victimData} 
+                                                                hide-checkbox-column="true" 
+                                                                key-field="id"
+                                                                min-column-width="100"
+                                                                onrowaction={handleRowAction}></lightning-datatable>
+                                    </div>
+                                </template>
+                            </div>
+                            <footer class="slds-modal__footer">
+                                <lightning-button variant="brand" label="Close" title="Close"  onclick={closeModalAction}></lightning-button>
+                        </footer> 
+                        </div>
+                    </section>
+                    <div class="slds-backdrop slds-backdrop_open"></div>
+                </template>
+            </lightning-card>
+        </div>
+    </div>
+</template>
