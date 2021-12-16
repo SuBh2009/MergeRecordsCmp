@@ -13,9 +13,27 @@
     </template>
     <div class="container">
         <div class="slds-scope">
-            <lightning-card variant="Narrow" icon-name="standard:file" title="File Upload">
+            <lightning-card variant="Narrow"  >
+                <div class="slds-page-header">
+                    <div class="slds-media">
+                        <div class="slds-media__figure">
+                            <lightning-icon icon-name="standard:file"></lightning-icon>
+                        </div>
+                        <div class="slds-media__body">
+                            <h1 class="slds-page-header__title slds-truncate slds-align-middle" title="">
+                                Merge Duplicate Records
+                            </h1>
+                            <p class="slds-text-body_small slds-line-height_reset">File Upload</p>
+                        </div>
+                    </div>
+                </div>
                 <div class="slds-var-p-horizontal_small">
                     <div class="slds-m-around_medium">
+                        <lightning-button name="sampleCSVformat"  label="Download sample csv format" 
+                            onclick={dowmloadSampleCSV}  variant="Base"     
+                            class="slds-m-around_small" > 
+                        </lightning-button>
+
                         <lightning-layout >
                             <lightning-layout-item size="4">
                                 <template if:true={objectPicklist.data}>
@@ -29,7 +47,7 @@
                                 <c-merge-Concern-Component></c-merge-Concern-Component> 
                             </lightning-layout-item>
                         </lightning-layout>
-                    </div>
+                    
                     <div if:true={displayFileUpload}>
                         <lightning-layout >
                             <lightning-layout-item size="4" class="">
@@ -71,6 +89,7 @@
                             </lightning-layout-item>
                         </lightning-layout>
                     </div>
+                </div>
                 </div>
                 <template if:true={modalContainer}>
                     <section  class="slds-modal slds-fade-in-open">

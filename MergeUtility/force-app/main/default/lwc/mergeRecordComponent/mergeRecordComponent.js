@@ -53,6 +53,25 @@ export default class MergeSobjectRecord extends LightningElement {
         status:"Status"
     }
 
+    sampleDataheaders = {
+        victimId:"Victim/Duplicate Id",
+        masterId:"Master Id"
+    }
+    sampleData= [
+        {
+            victimId:"0015j00000CyagSAAR",
+            masterId:"0015j00000CyagSAAR"
+        },
+        {
+            victimId:"0015j00000D00N2AAJ",
+            masterId:"0015j00000CyagSAAR"
+        },
+        {
+            victimId:"0015j00000D00N3AAJ",
+            masterId:"0015j00000CyagSAAR"
+        }
+    ]
+
 
     channelName = '/event/Merge_Event__e';
     isSubscribeDisabled = false;
@@ -195,6 +214,10 @@ export default class MergeSobjectRecord extends LightningElement {
         this.downloadAccountData();
     }
     downloadAccountData(){
-        exportCSVFile(this.headers, this.mergedCSVMap, "accounts detail")
+        exportCSVFile(this.headers, this.mergedCSVMap, "Merge Record Status")
+    }
+
+    dowmloadSampleCSV(){
+        exportCSVFile(this.sampleDataheaders, this.sampleData, "Merge Record")
     }
 }
