@@ -41,6 +41,7 @@ export default class CustomModal extends LightningElement {
         this.selectedValues = event.detail;
         this.disabledSaveBtn = JSON.parse(JSON.stringify(this.selectedValues)).length > 0 ? false : true;
     }
+    
     fetchRelatedFields(event) {
         this.sObjectName = event.detail.value;
         fetchSobjectFields({sobjectName : this.sObjectName})
@@ -53,7 +54,7 @@ export default class CustomModal extends LightningElement {
             this.dispatchEvent(
                 new ShowToastEvent({
                     title: 'Error!!',
-                    message: JSON.stringify(error),
+                    message: JSON.stringify(error.body.message),
                     variant: 'error',
                 }),
             );     

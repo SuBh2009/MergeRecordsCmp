@@ -1,9 +1,9 @@
 public class MergeController 
 {
     private static Set<String> sObjectFields = new Set<String>();
-    
+    private static String sObjectName = '';
     @AuraEnabled(cacheable=true)
-    public static String readCSVFile(Id contentDocumentId) {
+    public static String readCSVFile(Id contentDocumentId, String sobjectName) {
         Map<String, List<Id>> masterIdMap = new Map<String, List<Id>>();
         SobjectWrapperData responseData = new SobjectWrapperData();
         Set<String> accIdSet = new Set<String>();
@@ -11,7 +11,6 @@ public class MergeController
         //CsvWrapperData csvData;
         if (contentDocumentId != null)
         {
-            //csvData = new CsvWrapperData();
             ContentVersion contentVersionObj = [ SELECT Id, VersionData FROM ContentVersion WHERE ContentDocumentId =:contentDocumentId ];
             List <String> records = contentVersionObj.VersionData.toString().split( '\n' );
             //Removing the Header
@@ -36,10 +35,8 @@ public class MergeController
                         }
                     }
                 }
-                //csvData.recordDataMap = fetchRecords(accIdSet);
-                //csvData.csvRecordsMap = masterIdMap;
-                responseData.lstDataTableColumns = fetchColumnList('Account');
-                responseData = getMasterDataMap(masterIdMap, fetchRecords(accIdSet), responseData);
+                responseData.lstDataTableColumns = fetchColumnList(sobjectName);
+                responseData = getMasterDataMap(masterIdMap, fetchRecords(accIdSet, sObjectName), responseData);
                 
             }catch(Exception ex)
             {
@@ -51,15 +48,15 @@ public class MergeController
     }
     
     
-    private static SobjectWrapperData getMasterDataMap(Map<String, List<Id>> masterIdMap, Map<String, Account> recordDataMap, SobjectWrapperData wrpData)
+    private static SobjectWrapperData getMasterDataMap(Map<String, List<Id>> masterIdMap, Map<String, sObject> recordDataMap, SobjectWrapperData wrpData)
     {
-        List<Account> masterDataList = new List<Account>();
-        Map<Id, List<Account>> victimRecordMap = new Map<Id, List<Account>>();
-        Map<Id, Account> victimMasterRecordMap = new Map<Id, Account>();
+        List<sObject> masterDataList = new List<sObject>();
+        Map<Id, List<sObject>> victimRecordMap = new Map<Id, List<sObject>>();
+        Map<Id, sObject> victimMasterRecordMap = new Map<Id, sObject>();
         for(String masterId : masterIdMap.keySet())
         {
             masterDataList.add(recordDataMap.get(masterId));
-            victimRecordMap.put(masterId, new List<Account>());
+            victimRecordMap.put(masterId, new List<sObject>());
             for(Id victimId : masterIdMap.get(masterId))
             {
                 if(recordDataMap.containskey(victimId))
@@ -77,10 +74,14 @@ public class MergeController
     }
     
     
-    private static Map<String, Account> fetchRecords(Set<String> accIdSet)
+    private static Map<String, sObject> fetchRecords(Set<String> recordIds, String sobjectName)
     {
-        String sObjectQuery = 'Select Id,Name, '+String.join((Iterable<String>)sObjectFields, ', ') +' from Account where Id in: accIdSet' ;
-        return new Map<String, Account>((Account[]) Database.query(sObjectQuery));
+        Map<String,String> objNameMap = getObjectName();
+        system.debug('--sobjectName---'+sobjectName);
+         system.debug('--sobjectName---'+objNameMap.get('Account'));
+        String sObjectApiName = objNameMap.get(sobjectName);
+        String sObjectQuery = 'Select Id,Name, '+String.join((Iterable<String>)sObjectFields, ', ') +' from '+ sObjectApiName+' where Id in: recordIds' ;
+        return new Map<String, sObject>((sObject[]) Database.query(sObjectQuery));
         
     }
     
@@ -92,7 +93,6 @@ public class MergeController
                                                  FROM Merge_Concern__c
                                                  WHERE Object_Name__c = :sobjectName])
         {
-            system.debug('--mergeConcernData.Field_API_Name__c---'+sObjectFields.size());
             sObjectFields.add(mergeConcernData.Field_API_Name__c);
             lstDataColumns.add(new DataTableColumns(mergeConcernData.Field_Name__c.trim(), mergeConcernData.Field_API_Name__c.trim(), 'text'));
         }
@@ -104,8 +104,7 @@ public class MergeController
     public static void handleMergeRecord(String mergeRecords) 
     {
         SobjectWrapperData mergerRecords = (SobjectWrapperData)JSON.deserialize(mergeRecords, SobjectWrapperData.class);
-       // Database.executeBatch(new MergerBatch(mergerRecords.recordDataMap, mergerRecords.victimRecordMap, mergerRecords.victimRecordMap), 1);
-       Database.executeBatch(new MergerBatch(mergerRecords), 1);
+        Database.executeBatch(new MergerBatch(mergerRecords), 1);
     }
     
     @AuraEnabled(cacheable=true)
@@ -113,15 +112,8 @@ public class MergeController
     {
         SobjectWrapperData responseData = new SobjectWrapperData();
         Map<String, List<SobjectFields>> sObjectFieldsListMap = new Map<String, List<SobjectFields>>();
-        String sObjectApiName ='';
-        if(sobjectName.contains('__c'))
-        {
-            Map<String,String> objNameMap = getObjectName();
-            sObjectApiName = objNameMap.get(sObjectApiName);
-        } else
-        {
-            sObjectApiName = sobjectName;
-        }
+        Map<String,String> objNameMap = getObjectName();
+        String sObjectApiName = objNameMap.get(sobjectName);
         SObjectType sObjectType = Schema.getGlobalDescribe().get(sObjectApiName);
         Map<String,Schema.SObjectField> mfields = sObjectType.getDescribe().fields.getMap();
         List<SobjectFields> sObjectDetailsList = new List<SobjectFields>();
@@ -147,7 +139,7 @@ public class MergeController
         Map<String,String> objName = new Map<String,String>();
         for(Schema.SObjectType f : gd)
         {
-            if(f.getDescribe().isCustom())
+            if(!f.getDescribe().getName().contains('__mdt'))
                 objName.put(f.getDescribe().getLabel(),f.getDescribe().getName());
         }
         return objName;
@@ -237,17 +229,17 @@ public class MergeController
     
     public class SobjectWrapperData
     {
-        public List<Account> surviorDataList;
-        public Map<String, Account> recordDataMap;
-        public Map<Id, List<Account>> victimRecordMap;
-        public Map<Id, Account> victimMasterRecordMap;
+        public List<sObject> surviorDataList;
+        public Map<String, sObject> recordDataMap;
+        public Map<Id, List<sObject>> victimRecordMap;
+        public Map<Id, sObject> victimMasterRecordMap;
         public List<DataTableColumns> lstDataTableColumns;
         public Map<String, List<SobjectFields>> sObjectFieldsListMap;
     }
     
     public class SurvivorData
     {
-        public Account acc;
+        public sObject acc;
         public String recordLink;
     }
     

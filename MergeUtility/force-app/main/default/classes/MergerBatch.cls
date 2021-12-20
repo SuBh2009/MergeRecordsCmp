@@ -1,8 +1,8 @@
 public class MergerBatch implements Database.Batchable<sObject>,Database.Stateful,Database.RaisesPlatformEvents
 {
-    private Map<String, Account> recordDataMap;
-    private Map<Id, List<Account>> victimRecordMap;
-    private Map<Id, Account> victimMasterRecordMap;
+    private Map<String, sObject> recordDataMap;
+    private Map<Id, List<sObject>> victimRecordMap;
+    private Map<Id, sObject> victimMasterRecordMap;
     private Set<String> fieldsList;
     public Map<Id, List<ResponseError>> errorMasVicRecIdMap =new Map<Id, List<ResponseError>>();
     
