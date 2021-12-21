@@ -77,10 +77,12 @@ public class MergeController
     private static Map<String, sObject> fetchRecords(Set<String> recordIds, String sobjectName)
     {
         Map<String,String> objNameMap = getObjectName();
-        system.debug('--sobjectName---'+sobjectName);
-         system.debug('--sobjectName---'+objNameMap.get('Account'));
         String sObjectApiName = objNameMap.get(sobjectName);
-        String sObjectQuery = 'Select Id,Name, '+String.join((Iterable<String>)sObjectFields, ', ') +' from '+ sObjectApiName+' where Id in: recordIds' ;
+        String sObjectQuery = 'Select Id,Name ';
+        if(!sObjectFields.isEmpty())
+            sObjectQuery =sObjectQuery + ', '+(String.join((Iterable<String>)sObjectFields, ', '));
+                                  
+        sObjectQuery = sObjectQuery + ' from '+ sObjectApiName+' where Id in: recordIds';                          
         return new Map<String, sObject>((sObject[]) Database.query(sObjectQuery));
         
     }
