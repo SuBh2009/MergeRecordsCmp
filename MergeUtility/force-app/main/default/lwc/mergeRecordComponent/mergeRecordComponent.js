@@ -214,10 +214,10 @@ export default class MergeSobjectRecord extends LightningElement {
         this.downloadAccountData();
     }
     downloadAccountData(){
-        exportCSVFile(this.headers, this.mergedCSVMap, "Merge Record Status")
+        exportCSVFile(this.headers, this.mergedCSVMap, "Merge Duplicate Record Status")
     }
 
     dowmloadSampleCSV(){
-        exportCSVFile(this.sampleDataheaders, this.sampleData, "Merge Record")
+        exportCSVFile(this.sampleDataheaders, this.sampleData, "Merge Duplicate Records")
     }
 }
