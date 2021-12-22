@@ -106,12 +106,13 @@
                                     </div>
                                 </template>
                                 <template if:true={hasVictimData}>
-                                    <c-selection-Palette victim-data={victimData} master-data={masterData} master-row-id={masterRowId} lst-data-table-columns={lstDataTableColumns}></c-selection-Palette>
+                                    <c-selection-Palette victim-data={victimData} master-data={masterData} master-row-id={masterRowId} lst-data-table-columns={lstDataTableColumns} onselected={collectData}></c-selection-Palette>
                                 </template>
                             </div>
                             <footer class="slds-modal__footer">
-                                <lightning-button variant="brand" label="Close" title="Close"  onclick={closeModalAction}></lightning-button>
-                        </footer> 
+                                <lightning-button variant="neutral" label="Save" title="Save"  onclick={saveModalAction} disabled={disableSave} class="slds-m-around_small"></lightning-button>
+                                <lightning-button variant="brand" label="Close" title="Close"  onclick={closeModalAction} class="slds-m-around_small"></lightning-button>
+                            </footer> 
                         </div>
                     </section>
                     <div class="slds-backdrop slds-backdrop_open"></div>

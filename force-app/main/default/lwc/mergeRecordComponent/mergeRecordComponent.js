@@ -27,6 +27,8 @@ const columns = [
 export default class MergeSobjectRecord extends LightningElement {
    
     @track masterRowId;
+    @track dataToRetain;
+    @track disableSave = true;
     @api recordId;
     error;
     @api isLoaded = false;
@@ -149,6 +151,7 @@ export default class MergeSobjectRecord extends LightningElement {
    
      closeModalAction(){
       this.modalContainer=false;
+      this.disableSave = true;
      }
 
      handleMergeRecord(event) {
@@ -220,5 +223,15 @@ export default class MergeSobjectRecord extends LightningElement {
 
     dowmloadSampleCSV(){
         exportCSVFile(this.sampleDataheaders, this.sampleData, "Merge Duplicate Records")
+    }
+
+    collectData(event){
+        this.disableSave = false;
+        this.dataToRetain = event.detail;
+    }
+    saveModalAction(){
+        if(this.dataToRetain){
+            console.log('this.dataToRetain>>'+JSON.stringify(this.dataToRetain));
+        }
     }
 }
