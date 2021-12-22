@@ -8,6 +8,7 @@ export default class SelectionPalette extends LightningElement {
     @track _victimData;
     @track _masterData;
     @api masterRowId;
+    @track recordToUpdate; 
     @api
     get masterData(){
         return this._masterData;
@@ -21,7 +22,6 @@ export default class SelectionPalette extends LightningElement {
     }
     set victimData(value){
         this._victimData = value;
-        // console.log('_victimData>>'+JSON.stringify(this._victimData));
     }
     @api
     get lstDataTableColumns(){
@@ -30,7 +30,6 @@ export default class SelectionPalette extends LightningElement {
     set lstDataTableColumns(value){
         this._lstDataTableColumns = value;
         this._lstDataTableColumns.forEach(element => {
-            // console.log('fld>>'+element.label+'>>'+element.fieldName);
             let fldLbl = element.label;
             let fldApi = element.fieldName;
             this.masterData.forEach(ele => {
@@ -55,21 +54,31 @@ export default class SelectionPalette extends LightningElement {
             });
         });
         
-        console.log('final>>'+JSON.stringify(this.recsLstMap));
-        // console.log('masterRowId>>'+this.masterRowId);
         this.hideTT = (Object.keys(this.recsLstMap).length === 0);
-        // console.log('this.hideTT?'+this.hideTT);
         
         if(this.recsLstMap){
             let dataMap = this.recsLstMap;
             for(var key in dataMap){
                 this.mapkeyvaluestore.push({key:key,value:dataMap[key]});
             }
-            console.log('mapkeyvaluestore>>'+JSON.stringify(this.mapkeyvaluestore));
+            // console.log('mapkeyvaluestore>>'+JSON.stringify(this.mapkeyvaluestore));
         }
     } 
     
     handleRadioClick(event){
-        console.log('name>>'+event.target.name+' val>>'+event.target.value);
+        if(!this.recordToUpdate){
+            this.recordToUpdate = {Id:this.masterRowId};
+        }
+        this.lstDataTableColumns.forEach(element => {
+            let fldLbl = element.label;
+            let fldApi = element.fieldName;
+            if(event.target.name === fldLbl) {
+                this.recordToUpdate[fldApi]=event.target.value; 
+            }           
+        });
+        console.log('recordToUpdate>>'+JSON.stringify(this.recordToUpdate));
+        const selectedEvent = new CustomEvent('selected', { detail: this.recordToUpdate});
+        // Dispatches the event.
+        this.dispatchEvent(selectedEvent);
     }
 }
